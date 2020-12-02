@@ -1,0 +1,171 @@
+1. Write down your algorithm to solve “4 automated cars come to an intersection at the same time. Who goes first?”
+
+We assume the car is size same speed and acceleration, road same width    
+    if Driving on the right:
+       Go clockwise
+   elif Driving on the right:
+   	Go counter-clockwise
+   Starting from westmost car
+   Definiation of westmost min(arccos (car[i],west)), where car is a list of vector indicate the diectrion of motion
+
+Written in python at the end of the text
+ 
+
+2. Using your SSH client, TACC Portal user account credentials (i.e. username and password), connect to “isp.tacc.utexas.edu”. According the SSH banner information (i.e. messages that display when you first connect to a server through SSH), what is the web address for the “TACC Usage Policies”? 
+"
+   ** Unauthorized use/access is prohibited. **
+
+If you log on to this computer system, you acknowledge your awareness
+of and concurrence with the UT Austin Acceptable Use Policy. The
+University will prosecute violators to the full extent of the law.
+
+TACC Usage Policies:
+http://www.tacc.utexas.edu/user-services/usage-policies/
+ 
+"
+
+3. (a) What is the machine name of the Linux server you are logged into through SSH?  [Hint: server hostname]
+(b) What command did you use to find that information?
+(c) What reference (i.e. website, book, or other) did you use to find that command?
+
+(a) isp02.tacc.utexas.edu
+(b) hostname
+(c) " Je'aime Powell "
+ 
+
+4. (a) What is the IP address of Linux server you are logged into through SSH?
+(b) What command did you use to find that information?
+
+(a) 129.114.60.11
+(b) hostname -i 
+
+5. (a) What is the hard disk size of the / mount, of the Linux server you are logged into through SSH?  [Hint: Another name for the “/” mount is the “root filesystem”]
+(b) What command did you use to find that information?
+  
+(a) 379M
+(b) df -h
+
+6. (a) What is the kernel version of the Linux server you are logged into through SSH?
+(b) What command did you use to find that information?
+
+(a)3.10.0-1062.1.1.el7.x86_64
+(b)name -r
+
+7. (a) How long has the Linux server you are logged into through SSH been running?  [Hint: The amount of time the machine has been up?]
+(b) What command did you use to find that information?
+(a)268 days--------13:41:03 up 268 days,  3:06, 51 users,  load average: 0.00, 0.01, 0.05
+(b)uptime
+
+8. (a) What does the man command do?
+man x=manual of x 
+ 
+
+9. Name two (2) text editors you can use in the command line terminal in Linux.
+
+vi, vim, emacs, nano
+
+10. What does a software compiler do?
+Compiler, Computer software that translates (compiles) source code written in a high-level language (e.g., C++) into a set of machine-language instructions that can be understood by a digital computer's CPU. Compilers are very large programs, with error-checking and other abilities.
+Taken from "https://www.britannica.com/technology/compiler"
+
+
+
+
+
+
+
+Answer for question1
+
+
+import numpy as np
+import copy
+import matplotlib.pyplot as plt
+import random
+
+#********Car as the list of vector of motion *****
+#******** To north [ 1, 0] ***********
+#******** To south [-1, 0] ***********
+#******** To east  [ 0, 1] ***********
+#******** To west  [ 0,-1] ***********
+
+#***********User block********************
+n_car=4   #total number of cars
+car0=range(n_car)
+car0[0]=[0,1]
+car0[1]=[0,-1]
+car0[2]=[1,0]
+car0[3]=[-1,0]
+
+standard=[ -1,0]  #westward car go first
+right_driving=True  #set to True if user is driving on the rightside
+#***********User block****** **************
+
+def angle(vector_1,vector_2): #Return the angle of two vectors from vector1 to vector2
+    unit_vector_1 = vector_1 / np.linalg.norm(vector_1)
+    unit_vector_2 = vector_2 / np.linalg.norm(vector_2)
+    dot_product = np.dot(unit_vector_1, unit_vector_2)
+    if np.cross(unit_vector_1, unit_vector_2)==0:
+        sign=1.
+    else:
+        sign = np.cross(unit_vector_1, unit_vector_2)/abs(np.cross(unit_vector_1, unit_vector_2))
+    angle = sign*np.arccos(dot_product)          #in rad 
+    if angle<0:
+        angle=2.*np.pi+angle
+    return angle
+
+def angle_list_calc(standard, car):  #Find the west going car as the starting car
+    angle_list=[]
+    for i in range(len(car)):
+        angle_list.append(angle(car[i],standard) )
+    return angle_list
+
+def next_car_calc(car, car_order): #Determine the next car to go
+    car_last=car[car_order[-1]]  #last car that moved
+    car_list=range(len(car))     #order of the car to keep track of 
+    car_list_origin=range(len(car))     #order of the car to keep track of
+    car_temp=copy.deepcopy(car)
+
+    for i in car_order:
+        car_temp.remove(car[i])
+        car_list.remove(car_list_origin[i])
+    angle_list=angle_list_calc(car_last, car_temp)
+    next_car=car_list[np.argmin(angle_list)]
+    return next_car
+    #np.cross()
+
+def order(standard,car): #calculate the order of the car based on direction of motion
+    car_order=[]
+    car.append(standard)
+    car_order.append(len(car)-1)
+    '''
+    angle_list=angle_list_calc(standard, car)
+    print(angle_list)
+    index_standard_car=np.argmin(angle_list)
+    car_order.append(index_standard_car)
+    '''
+
+    for i in range(len(car)-1):
+        print("Carrrrr:"+str(car))
+        next_car=next_car_calc(car, car_order)
+        car_order.append(next_car)
+        print("Car order: "+str(car_order))
+    car=car[:-1]
+    car_order=car_order[1:]
+
+    plt.clf()
+    plt.ylabel(r'$North$',fontsize=10)
+    plt.xlabel(r'$East$',fontsize=10)
+    
+    number_of_colors = len(car)
+    color0 = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
+             for i in range(number_of_colors)]
+    
+    for i in range(len(car_order)):
+        plt.quiver([0], [0], [car[car_order[i]][0]], [car[car_order[i]][1]],label="car#"+str(i),color=color0[i])
+    plt.title('Order of passing cars',fontsize=10)
+    plt.legend()
+    plt.show()
+
+    return car_order
+car_order=order(standard,car0)
+print(car_order)

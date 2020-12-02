@@ -1,0 +1,4 @@
+Shifting integar K = 42
+Original words:  Life the universe and everything equals 42!!!
+Encrypted words: Byvu?jxu?kdyluhiu?qdt?uluhojxydw?ugkqbi?*(!!!
+Decrypted words: Life the universe and everything equals 42!!!
